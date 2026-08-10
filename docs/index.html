@@ -39,17 +39,41 @@
   a { color: #0969da; text-decoration: none; }
   a:hover { text-decoration: underline; }
   .ref-list { font-size: 0.9em; }
+  .toc { background: #fafafa; border: 1px solid #eee; border-radius: 6px; padding: 1rem 1.5rem; }
+  .toc ul { margin: 0.3rem 0; }
+  .note { font-size: 0.9em; color: #555; }
 </style>
 </head>
 <body>
 
 <blockquote>
 <strong>About this page</strong><br>
-This page is the external reference for the formulas and crystallographic rules implemented in <code>xrd_app.py</code>. Each section below has a fixed anchor ID (shown in the URL when you click a heading) so it can be linked to directly from the application &mdash; e.g. a &ldquo;View derivation&rdquo; button next to a field in the GUI. Anchor IDs are stable even if section titles are edited later &mdash; link to the anchor, not the heading text.
-
+This page is the external reference for the formulas, crystallographic rules, and interactive tools implemented in <code>xrd_app.py</code>. Each section below has a fixed anchor ID (shown in the URL when you click a heading) so it can be linked to directly from the application &mdash; e.g. a &ldquo;View derivation&rdquo; button next to a field in the GUI. Anchor IDs are stable even if section titles are edited later &mdash; link to the anchor, not the heading text.
 </blockquote>
 
 <h1 id="top">XRD Parameter Reference</h1>
+
+<div class="toc">
+<strong>Contents</strong>
+<ul>
+  <li><a href="#sec-1-axis-choices">1. Axis Choices and Physical Meaning</a></li>
+  <li><a href="#sec-2-app-overview">XRD Parameter Analyzer</a>
+    <ul>
+      <li><a href="#sec-2-braggs-law">2. Bragg's Law</a></li>
+      <li><a href="#sec-3-triclinic-d-spacing">3. Interplanar Spacing (Triclinic)</a></li>
+      <li><a href="#sec-4-systematic-absences">4. Systematic Absences</a></li>
+      <li><a href="#sec-5-wavelength-conversion">5. Wavelength Conversion</a></li>
+      <li><a href="#sec-6-zero-shift">6. Zero-Shift Correction</a></li>
+      <li><a href="#sec-7-overlay-window">7. Overlay Window (Window B)</a></li>
+      <li><a href="#sec-8-axis-mode-conversion">8. X-axis Display-Mode Conversion</a></li>
+      <li><a href="#sec-9-alignment-tool">9. Interactive Peak Alignment (Zero-Shift by Click)</a></li>
+      <li><a href="#sec-10-workflow-overview">10. Application Workflow Overview</a></li>
+      <li><a href="#sec-11-formula-function-map">11. Formula / Feature to Function Map</a></li>
+    </ul>
+  </li>
+  <li><a href="#sec-references">References</a></li>
+</ul>
+</div>
 
 <h2 id="sec-1-axis-choices">1. Axis Choices and Physical Meaning</h2>
 
@@ -83,11 +107,13 @@ $$q = \frac{4\pi\sin\theta}{\lambda}$$
 
 <p><strong>Use:</strong> In crystallography, atomic scattering factors are often discussed as functions of $\sin\theta/\lambda$, making this a convenient standard variable for refinement and structure analysis.</p>
 
+<p class="note">In the app, all four representations are selectable from the same dropdown ("X-axis:") in both Window A and Window B. See <a href="#sec-8-axis-mode-conversion">&sect;8</a> for how the app converts between them.</p>
+
 <hr>
 
 <h1 id="sec-2-app-overview">XRD Parameter Analyzer</h1>
 
-<p>This section summarizes the main formulas and crystallographic rules implemented in <code>xrd_app.py</code>.</p>
+<p>This section summarizes the main formulas, crystallographic rules, and interactive tools implemented in <code>xrd_app.py</code>.</p>
 
 <h2 id="sec-2-braggs-law">2. Bragg's Law</h2>
 
@@ -105,12 +131,12 @@ $$n\lambda = 2d\sin\theta \quad (n=1)$$
 
 <p><strong>d &rarr; &theta;</strong>: predicts where a peak should appear:</p>
 $$\theta = \arcsin\left(\frac{\lambda}{2d}\right)$$
-<p>Then the plotted peak position is 2&theta;. Implemented in <code>calculate_bragg_angle(wavelength, d_spacing)</code>. If $\lambda/(2d) > 1$, the reflection is physically unreachable at that wavelength and the function returns <code>None</code>.</p>
-<p><strong>&theta; &rarr; d</strong> is not used directly, but the inverse relation is used when converting a measured pattern from one wavelength to another.</p>
+<p>Then the plotted peak position is 2&theta;. Implemented in <code>calculate_bragg_angle(wavelength, d_spacing)</code>. If $\lambda/(2d) > 1$ (or $d \le 0$), the reflection is physically unreachable at that wavelength and the function returns <code>None</code>, so it is simply skipped when scanning h/k/l space.</p>
+<p><strong>&theta; &rarr; d</strong> is not used directly, but the inverse relation is used when converting a measured pattern from one wavelength to another (&sect;5) and when converting between axis display modes (&sect;8).</p>
 
 <h2 id="sec-3-triclinic-d-spacing">3. Interplanar Spacing: General Triclinic Formula</h2>
 
-<p>Because triclinic is the lowest-symmetry crystal system, its $d$-spacing formula is the most general one and can also describe higher-symmetry systems by applying symmetry constraints such as $\alpha = \beta = \gamma = 90^\circ$. For this reason, the code implements only the triclinic case in <code>CrystalSystemCalculator.triclinic</code>.</p>
+<p>Because triclinic is the lowest-symmetry crystal system, its $d$-spacing formula is the most general one and can also describe higher-symmetry systems by applying symmetry constraints such as $\alpha = \beta = \gamma = 90^\circ$. For this reason, the code implements only the triclinic case in <code>CrystalSystemCalculator.triclinic</code>, and every crystal system is entered simply by typing the appropriate a/b/c/&alpha;/&beta;/&gamma; values.</p>
 
 <h3 id="sec-3-1-unit-cell-volume">3.1 Unit-cell volume</h3>
 $$V = abc\sqrt{1 - \cos^2\alpha - \cos^2\beta - \cos^2\gamma + 2\cos\alpha\cos\beta\cos\gamma}$$
@@ -120,12 +146,14 @@ $$\frac{1}{d^2} = \frac{h^2b^2c^2\sin^2\alpha + k^2a^2c^2\sin^2\beta + l^2a^2b^2
 
 <p><strong>Where:</strong></p>
 <ul>
-  <li><strong>a, b, c</strong> = unit-cell edge lengths</li>
-  <li><strong>&alpha;, &beta;, &gamma;</strong> = unit-cell angles</li>
-  <li><strong>h, k, l</strong> = Miller indices</li>
+  <li><strong>a, b, c</strong> = unit-cell edge lengths (must be &gt; 0)</li>
+  <li><strong>&alpha;, &beta;, &gamma;</strong> = unit-cell angles (must be between 0&deg; and 180&deg;)</li>
+  <li><strong>h, k, l</strong> = Miller indices, scanned over &plusmn;20 for each index (<code>HKL_H_RANGE</code>, <code>HKL_K_RANGE</code>, <code>HKL_L_RANGE</code>)</li>
 </ul>
 
-<p>If the square-root term in the volume expression becomes negative due to invalid geometry, it is clamped to zero. If $1/d^2 \le 0$, the reflection is treated as nonexistent, with $d = \infty$. Implemented in <code>CrystalSystemCalculator.triclinic(h, k, l, a, b, c, alpha_deg, beta_deg, gamma_deg)</code>.</p>
+<p>If the square-root term (cell-volume term) is not positive, or the resulting volume is not positive, the function raises a <code>ValueError</code> rather than silently continuing. If $1/d^2 \le 0$, the reflection is treated as nonexistent, with $d = \infty$. Implemented in <code>CrystalSystemCalculator.triclinic(h, k, l, a, b, c, alpha_deg, beta_deg, gamma_deg)</code>.</p>
+
+<p class="note">Friedel pairs $(h,k,l)$ and $(-h,-k,-l)$ have identical d-spacing, so the reflection scan (<code>_iter_theoretical_reflections</code>) keeps only one representative of each pair to avoid duplicate peaks.</p>
 
 <h2 id="sec-4-systematic-absences">4. Systematic Absences</h2>
 
@@ -155,7 +183,7 @@ $$\frac{1}{d^2} = \frac{h^2b^2c^2\sin^2\alpha + k^2a^2c^2\sin^2\beta + l^2a^2b^2
   <tr><td>$4_1, 4_3$</td><td>index mod 4 = 0</td></tr>
   <tr><td>$6_1, 6_5$</td><td>index mod 6 = 0</td></tr>
 </table>
-<p>Implemented in <code>screw_axis_forbidden(h, k, l, axis, screw_rule)</code>.</p>
+<p>The index $0$ itself (i.e. the origin-adjacent reflection along that axis) is never treated as forbidden. Implemented in <code>screw_axis_forbidden(h, k, l, axis, screw_rule)</code>.</p>
 
 <h3 id="sec-4-3-glide-planes">4.3 Glide Planes</h3>
 <p>A glide plane perpendicular to an axis affects only <strong>zonal reflections</strong> with that axis index equal to zero: $0kl$ perpendicular to $a$, $h0l$ perpendicular to $b$, and $hk0$ perpendicular to $c$. For the remaining two indices $u$ and $v$:</p>
@@ -172,10 +200,10 @@ $$\frac{1}{d^2} = \frac{h^2b^2c^2\sin^2\alpha + k^2a^2c^2\sin^2\beta + l^2a^2b^2
 <h3 id="sec-4-4-combining-rules">4.4 Combining the Rules</h3>
 <p>A reflection is classified as:</p>
 <ul>
-  <li><strong>absent</strong> if <code>lattice_forbidden</code> OR <code>screw_axis_forbidden</code> OR <code>glide_plane_forbidden</code></li>
+  <li><strong>absent</strong> if <code>lattice_forbidden</code> OR any of the three <code>screw_axis_forbidden</code> checks (a/b/c) OR any of the three <code>glide_plane_forbidden</code> checks (&perp;a/&perp;b/&perp;c) is true</li>
   <li><strong>allowed</strong> otherwise</li>
 </ul>
-<p>Implemented in <code>systematic_absence_reasons(...)</code> and <code>classify_reflection(...)</code>.</p>
+<p>Implemented in <code>systematic_absence_reasons(...)</code> (returns the list of failing rules, used for diagnostics) and <code>classify_reflection(...)</code> (returns just <code>"absent"</code> or <code>"allowed"</code>). Both are configured through the "Symmetry &amp; Systematic Absence" dialog, which edits the lattice type and the six screw/glide selectors (along a/b/c, &perp;a/&perp;b/&perp;c).</p>
 
 <h2 id="sec-5-wavelength-conversion">5. Wavelength Conversion of a Measured Pattern</h2>
 
@@ -187,39 +215,105 @@ $$\sin\theta_2 = \left(\frac{\lambda_2}{\lambda_1}\right)\sin\theta_1$$
 $$\theta_2 = \arcsin\left[\left(\frac{\lambda_2}{\lambda_1}\right)\sin\theta_1\right]$$
 <p>which gives</p>
 $$2\theta_2 = 2\arcsin\left[\left(\frac{\lambda_2}{\lambda_1}\right)\sin\left(\frac{2\theta_1}{2}\right)\right]$$
-<p>If $|(\lambda_2/\lambda_1)\sin\theta_1| > 1$, the peak has no valid angle at the new wavelength and is marked invalid (<code>NaN</code>). Implemented in <code>_convert_two_theta_by_wavelength(two_theta_deg, lam_from, lam_to)</code>.</p>
+<p>If $|(\lambda_2/\lambda_1)\sin\theta_1| > 1$, the peak has no valid angle at the new wavelength and is marked invalid (<code>NaN</code>). Implemented in <code>_convert_two_theta_by_wavelength(two_theta_deg, lam_from, lam_to)</code>. The source wavelength is recorded per loaded file (asked for at Open-file time) and reused whenever that curve is exported, re-plotted, or sent to the overlay window.</p>
 
 <h2 id="sec-6-zero-shift">6. Zero-Shift Correction</h2>
 <p>A simple additive correction is applied to compensate for instrument misalignment:</p>
 $$2\theta_{\text{corrected}} = 2\theta_{\text{converted}} + \Delta 2\theta$$
-<p>where $\Delta 2\theta$ is the zero-shift offset in degrees. Applied throughout <code>compute_and_plot()</code>, <code>export_to_txt()</code>, and <code>save_project()</code>.</p>
+<p>where $\Delta 2\theta$ is the zero-shift offset in degrees, taken from the "Zero shift &Delta;2&theta;" field. It updates the plot in real time (bound via a Tk trace on <code>zero_shift_var</code>) and is applied to the <em>theoretical</em> peak positions, not the measured data. Applied throughout <code>compute_and_plot()</code>, <code>export_to_txt()</code>/<code>export_to_csv()</code>, and persisted by <code>save_project()</code>.</p>
 
-<h2 id="sec-7-overlay-window">7. Overlay Window</h2>
+<h2 id="sec-7-overlay-window">7. Overlay Window (Window B)</h2>
 <p>These are display-only transformations used for comparing multiple curves; they are not physical formulas.</p>
 
 <h3 id="sec-7-1-normalization">7.1 Normalization</h3>
 $$y_{\text{norm}} = \frac{y - y_{\min}}{y_{\max} - y_{\min}}$$
+<p>Toggled with the "Normalize (0&ndash;1)" checkbox; rescales each curve to its own min/max range independently.</p>
 
 <h3 id="sec-7-2-vertical-scaling">7.2 Vertical scaling and shifting</h3>
 $$y_{\text{display}} = y \cdot \text{scale} + y_{\text{shift}}$$
+<p>The Y-offset step is applied per curve as $y_{\text{shift},i} = \text{offset} \times i$ (curve index $i$), producing an automatic "waterfall" stack; the global scale field multiplies every curve's intensity uniformly.</p>
 
-<h3 id="sec-7-3-drag-to-scale">7.3 Interactive drag-to-scale</h3>
-<p>Dragging a curve up or down rescales it so its peak reaches the new height:</p>
-$$\text{scale} = \frac{\text{peak\_value} + y_{\text{shift}}}{\text{peak\_value}}$$
-<p>Implemented in <code>_compute_display_y()</code> and <code>_on_b_window_motion()</code>.</p>
+<h3 id="sec-7-3-drag-to-scale">7.3 Interactive drag-to-reposition</h3>
+<p>Clicking and dragging a curve vertically in Window B directly edits its <code>y_shift</code> in real time (delta between mouse-down and current mouse Y position), for one curve or for all curves currently selected in the list at once. Implemented in <code>_on_b_window_press/_motion/_release()</code>.</p>
 
-<h2 id="sec-8-formula-function-map">8. Formula to Function Map</h2>
+<h3 id="sec-7-4-per-curve-zero-shift">7.4 Per-curve zero shift in Window B</h3>
+<p>Independently of the zero shift in Window A (&sect;6), each overlay curve can carry its own $\Delta 2\theta$ offset, applied the same way: $2\theta_{\text{shown}} = 2\theta_{\text{sent}} + \Delta 2\theta_{\text{curve}}$. Set via the "Zero shift" field + "Apply to Selected" button, and stored per record so multiple curves can be aligned to each other independently.</p>
+
+<p>Implemented in <code>_compute_display_y()</code>, <code>_apply_b_window_offsets()</code>, and <code>_apply_selected_zero_shift()</code>.</p>
+
+<h2 id="sec-8-axis-mode-conversion">8. X-axis Display-Mode Conversion</h2>
+<p>Both plot windows let the x-axis be displayed as 2&theta;, $d$-spacing, $\sin\theta/\lambda$, or $q$ (&sect;1). Internally, every peak and every data point is always stored as 2&theta; in degrees; conversion to/from the selected display mode happens only at plot time, so switching modes never loses precision.</p>
+
+<h3 id="sec-8-1-forward">8.1 Forward: 2&theta; &rarr; display mode</h3>
 <table>
-  <tr><th>Formula / Rule</th><th>Function in code</th><th>Reference section</th></tr>
+  <tr><th>Mode</th><th>Formula</th></tr>
+  <tr><td>2&theta; (deg)</td><td>identity</td></tr>
+  <tr><td>d-spacing (&Aring;)</td><td>$d = \lambda / (2\sin(\theta))$, undefined (NaN) if $\sin\theta = 0$</td></tr>
+  <tr><td>sin(&theta;)/&lambda; (&Aring;&#8315;&sup1;)</td><td>$\sin\theta / \lambda$</td></tr>
+  <tr><td>q (4&pi;&middot;sin&theta;/&lambda;)</td><td>$4\pi\sin\theta/\lambda$</td></tr>
+</table>
+<p>Implemented in <code>_convert_2theta_to_mode(two_theta, mode, lam)</code>.</p>
+
+<h3 id="sec-8-2-inverse">8.2 Inverse: display mode &rarr; 2&theta;</h3>
+<p>Used whenever the user interacts directly with the plotted x-axis &mdash; e.g. entering an X-min/X-max range in a non-2&theta; mode, or clicking on the plot for peak picking/alignment. Each is the algebraic inverse of &sect;8.1, re-clamped to the physically valid range $-1 \le \sin\theta \le 1$:</p>
+$$
+2\theta =
+\begin{cases}
+2\arcsin\!\left(\dfrac{\lambda}{2d}\right) & \text{from } d\text{-spacing} \\[6pt]
+2\arcsin\!\left(v\lambda\right) & \text{from } \sin\theta/\lambda = v \\[6pt]
+2\arcsin\!\left(\dfrac{v\lambda}{4\pi}\right) & \text{from } q = v
+\end{cases}
+$$
+<p>Implemented in <code>_convert_mode_to_2theta(val, mode, lam)</code>. When the axis mode is changed via the dropdown, the current X-min/X-max range is also converted (through 2&theta; as an intermediate step) so the visible window stays consistent, and min/max are swapped automatically if the conversion reverses their order (which happens for d-spacing, since larger $2\theta$ means smaller $d$).</p>
+
+<h2 id="sec-9-alignment-tool">9. Interactive Peak Alignment (Zero-Shift by Click)</h2>
+<p>Rather than typing a numeric zero-shift, the plot supports a two-click workflow to solve for it directly from a visual misalignment:</p>
+<ol>
+  <li><strong>First double-click</strong> near a theoretical peak (within the proximity threshold) selects that peak and records its raw, un-shifted position $2\theta_{\text{source}}$.</li>
+  <li><strong>Second double-click</strong> anywhere on the plot gives the target x-position; it is converted back to 2&theta; using the inverse conversion in &sect;8.2 to get $2\theta_{\text{target}}$.</li>
+</ol>
+<p>The new zero shift is then solved as:</p>
+$$\Delta 2\theta_{\text{new}} = 2\theta_{\text{target}} - 2\theta_{\text{source}}$$
+<p>and written directly into the "Zero shift" field, which immediately re-plots via the existing trace callback (&sect;6). Implemented in <code>_on_align_click(event)</code>, using <code>_align_pick_tt</code> to hold the pending selection between the two clicks.</p>
+
+<p class="note">This is separate from the single-click "pin/unpin (hkl) label" behavior (<code>_on_click_hkl</code>), which only toggles a persistent index label on a peak and does not change any shift.</p>
+
+<h2 id="sec-10-workflow-overview">10. Application Workflow Overview</h2>
+<p>These are not physical formulas, but summarize how the tools in the GUI fit together, for reference alongside the sections above.</p>
+<table>
+  <tr><th>Feature</th><th>What it does</th></tr>
+  <tr><td>Open XRD Data...</td><td>Loads a two-column (2&theta;, intensity) text/CSV file; asks for the source wavelength used at collection time, so later wavelength changes can be auto-converted (&sect;5).</td></tr>
+  <tr><td>Import TXT Params...</td><td>Parses a table of candidate unit-cell solutions (e.g. indexing-program output) and lets the user pick one row to auto-fill a/b/c/&alpha;/&beta;/&gamma;.</td></tr>
+  <tr><td>Compute &amp; Plot</td><td>Re-scans h/k/l space (&sect;3), classifies each reflection (&sect;4), applies zero shift (&sect;6) and the selected axis mode (&sect;8), and redraws the plot.</td></tr>
+  <tr><td>Export Data (TXT/CSV)</td><td>TXT: side-by-side measured and theoretical-peak columns, absent peaks prefixed with <code>#</code>. CSV: an Origin-style template, with absence markers drawn as 0&rarr;y_max&rarr;0 spikes when absences are shown.</td></tr>
+  <tr><td>Save/Load Project (.xrdproj)</td><td>Serializes all data series, unit cell, symmetry rules, colors, view ranges, pinned (hkl) labels, and overlay curves to JSON, plus a PNG snapshot of the current plot.</td></tr>
+  <tr><td>Save State / Restore</td><td>Snapshots the full project payload into a small local SQLite database (<code>.state/xrd_state.sqlite3</code>) for quick undo-style recall between named states, independent of the project file.</td></tr>
+  <tr><td>Send Data to Window B</td><td>Copies the currently displayed curve(s) into the overlay window (&sect;7), applying the current wavelength conversion and zero shift first so what's sent matches what's shown.</td></tr>
+  <tr><td>Symmetry &amp; Systematic Absence Rules</td><td>Dialog for editing the lattice type and all six screw-axis/glide-plane selectors used in &sect;4.</td></tr>
+  <tr><td>Shortcut Settings</td><td>Lets the user remap the keyboard shortcuts (open/save/plot/undo/quit/pan) shown in Help &gt; Shortcuts.</td></tr>
+  <tr><td>Undo View / arrow keys / scroll / drag</td><td>Standard plot navigation: box zoom (left-drag), pan (right-drag or arrow keys), zoom (scroll wheel), and a view-history stack for undo.</td></tr>
+</table>
+
+<h2 id="sec-11-formula-function-map">11. Formula / Feature to Function Map</h2>
+<table>
+  <tr><th>Formula / Rule / Feature</th><th>Function in code</th><th>Reference section</th></tr>
   <tr><td>Bragg's Law (d &rarr; &theta;)</td><td><code>calculate_bragg_angle()</code></td><td><a href="#sec-2-braggs-law">&sect;2</a></td></tr>
   <tr><td>Triclinic d-spacing and cell volume</td><td><code>CrystalSystemCalculator.triclinic()</code></td><td><a href="#sec-3-triclinic-d-spacing">&sect;3</a></td></tr>
+  <tr><td>Reflection scan / Friedel-pair dedup</td><td><code>_iter_theoretical_reflections()</code></td><td><a href="#sec-3-triclinic-d-spacing">&sect;3</a></td></tr>
   <tr><td>Lattice centering absences</td><td><code>lattice_forbidden()</code></td><td><a href="#sec-4-1-lattice-centering">&sect;4.1</a></td></tr>
   <tr><td>Screw-axis absences</td><td><code>screw_axis_forbidden()</code></td><td><a href="#sec-4-2-screw-axes">&sect;4.2</a></td></tr>
   <tr><td>Glide-plane absences</td><td><code>glide_plane_forbidden()</code></td><td><a href="#sec-4-3-glide-planes">&sect;4.3</a></td></tr>
   <tr><td>Combined absence classification</td><td><code>systematic_absence_reasons()</code>, <code>classify_reflection()</code></td><td><a href="#sec-4-4-combining-rules">&sect;4.4</a></td></tr>
   <tr><td>Wavelength conversion (&lambda;&#8321; &rarr; &lambda;&#8322;)</td><td><code>_convert_two_theta_by_wavelength()</code></td><td><a href="#sec-5-wavelength-conversion">&sect;5</a></td></tr>
   <tr><td>Zero-shift correction</td><td>applied inline in <code>compute_and_plot()</code></td><td><a href="#sec-6-zero-shift">&sect;6</a></td></tr>
-  <tr><td>Overlay normalization / scaling</td><td><code>_compute_display_y()</code></td><td><a href="#sec-7-overlay-window">&sect;7</a></td></tr>
+  <tr><td>Overlay normalization / scaling / shifting</td><td><code>_compute_display_y()</code>, <code>_apply_b_window_offsets()</code></td><td><a href="#sec-7-overlay-window">&sect;7</a></td></tr>
+  <tr><td>Overlay per-curve zero shift</td><td><code>_apply_selected_zero_shift()</code></td><td><a href="#sec-7-4-per-curve-zero-shift">&sect;7.4</a></td></tr>
+  <tr><td>Axis display-mode conversion (forward)</td><td><code>_convert_2theta_to_mode()</code></td><td><a href="#sec-8-axis-mode-conversion">&sect;8.1</a></td></tr>
+  <tr><td>Axis display-mode conversion (inverse)</td><td><code>_convert_mode_to_2theta()</code></td><td><a href="#sec-8-axis-mode-conversion">&sect;8.2</a></td></tr>
+  <tr><td>Click-to-align zero shift</td><td><code>_on_align_click()</code></td><td><a href="#sec-9-alignment-tool">&sect;9</a></td></tr>
+  <tr><td>Pin/unpin (hkl) label</td><td><code>_on_click_hkl()</code>, <code>_add_pinned_annotation()</code></td><td><a href="#sec-9-alignment-tool">&sect;9</a></td></tr>
+  <tr><td>Project save/load (.xrdproj)</td><td><code>save_project()</code>, <code>load_project()</code>, <code>_build_project_payload()</code>, <code>_apply_project_payload()</code></td><td><a href="#sec-10-workflow-overview">&sect;10</a></td></tr>
+  <tr><td>TXT / CSV export</td><td><code>export_to_txt()</code>, <code>_write_txt_export()</code>, <code>_write_csv_export()</code></td><td><a href="#sec-10-workflow-overview">&sect;10</a></td></tr>
 </table>
 
 <p><a href="#top">Back to top</a></p>
