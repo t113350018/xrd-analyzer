@@ -315,14 +315,32 @@ $$\Delta 2\theta_{\text{new}} = 2\theta_{\text{target}} - 2\theta_{\text{source}
   <tr><td>Project save/load (.xrdproj)</td><td><code>save_project()</code>, <code>load_project()</code>, <code>_build_project_payload()</code>, <code>_apply_project_payload()</code></td><td><a href="#sec-10-workflow-overview">&sect;10</a></td></tr>
   <tr><td>TXT / CSV export</td><td><code>export_to_txt()</code>, <code>_write_txt_export()</code>, <code>_write_csv_export()</code></td><td><a href="#sec-10-workflow-overview">&sect;10</a></td></tr>
 </table>
+<form action="https://formspree.io/f/xnpadjgb" method="POST">
 
+  <label for="email">你的 Email：</label><br>
+  <input
+    type="email"
+    id="email"
+    name="email"
+    placeholder="example@gmail.com"
+    required
+  >
+  <br><br>
 
-
-  <form action="https://formspree.io/f/xnpadjgb" method="POST">
   <label for="message">訊息：</label><br>
-  <textarea id="message" name="message" rows="6" required></textarea>
-  <br>
+  <textarea
+    id="message"
+    name="message"
+    rows="6"
+    placeholder="請輸入訊息"
+    required
+  ></textarea>
+  <br><br>
+
+  <input type="hidden" name="_subject" value="XRD Parameter Reference 網站留言">
+
   <button type="submit">送出</button>
+
 </form>
 <p><a href="#top">Back to top</a></p>
 
