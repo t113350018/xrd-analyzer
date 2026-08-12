@@ -1045,4 +1045,315 @@
     <tr>
       <td>Undo View / arrow keys / scroll / drag</td>
       <td>
+        Provides standard plot navigation.
+      </td>
+    </tr>
+  </table>
+
+  <h2 id="sec-11-formula-function-map">
+    11. Formula / Feature to Function Map
+  </h2>
+
+  <table>
+    <tr>
+      <th>Formula / Rule / Feature</th>
+      <th>Function in code</th>
+      <th>Reference section</th>
+    </tr>
+
+    <tr>
+      <td>Bragg's Law</td>
+      <td><code>calculate_bragg_angle()</code></td>
+      <td>
+        <a href="#sec-2-braggs-law">&sect;2</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Triclinic d-spacing and cell volume</td>
+      <td>
+        <code>CrystalSystemCalculator.triclinic()</code>
+      </td>
+      <td>
+        <a href="#sec-3-triclinic-d-spacing">&sect;3</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Reflection scan / Friedel-pair dedup</td>
+      <td>
+        <code>_iter_theoretical_reflections()</code>
+      </td>
+      <td>
+        <a href="#sec-3-triclinic-d-spacing">&sect;3</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Lattice centering absences</td>
+      <td>
+        <code>lattice_forbidden()</code>
+      </td>
+      <td>
+        <a href="#sec-4-1-lattice-centering">&sect;4.1</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Screw-axis absences</td>
+      <td>
+        <code>screw_axis_forbidden()</code>
+      </td>
+      <td>
+        <a href="#sec-4-2-screw-axes">&sect;4.2</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Glide-plane absences</td>
+      <td>
+        <code>glide_plane_forbidden()</code>
+      </td>
+      <td>
+        <a href="#sec-4-3-glide-planes">&sect;4.3</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Combined absence classification</td>
+      <td>
+        <code>systematic_absence_reasons()</code><br>
+        <code>classify_reflection()</code>
+      </td>
+      <td>
+        <a href="#sec-4-4-combining-rules">&sect;4.4</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Wavelength conversion</td>
+      <td>
+        <code>_convert_two_theta_by_wavelength()</code>
+      </td>
+      <td>
+        <a href="#sec-5-wavelength-conversion">&sect;5</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Zero-shift correction</td>
+      <td>
+        Applied in <code>compute_and_plot()</code>
+      </td>
+      <td>
+        <a href="#sec-6-zero-shift">&sect;6</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Overlay normalization / scaling / shifting</td>
+      <td>
+        <code>_compute_display_y()</code><br>
+        <code>_apply_b_window_offsets()</code>
+      </td>
+      <td>
+        <a href="#sec-7-overlay-window">&sect;7</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Overlay per-curve zero shift</td>
+      <td>
+        <code>_apply_selected_zero_shift()</code>
+      </td>
+      <td>
+        <a href="#sec-7-4-per-curve-zero-shift">&sect;7.4</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Axis display-mode conversion</td>
+      <td>
+        <code>_convert_2theta_to_mode()</code><br>
+        <code>_convert_mode_to_2theta()</code>
+      </td>
+      <td>
+        <a href="#sec-8-axis-mode-conversion">&sect;8</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Click-to-align zero shift</td>
+      <td>
+        <code>_on_align_click()</code>
+      </td>
+      <td>
+        <a href="#sec-9-alignment-tool">&sect;9</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>Project save/load</td>
+      <td>
+        <code>save_project()</code><br>
+        <code>load_project()</code>
+      </td>
+      <td>
+        <a href="#sec-10-workflow-overview">&sect;10</a>
+      </td>
+    </tr>
+
+    <tr>
+      <td>TXT / CSV export</td>
+      <td>
+        <code>export_to_txt()</code><br>
+        <code>export_to_csv()</code>
+      </td>
+      <td>
+        <a href="#sec-10-workflow-overview">&sect;10</a>
+      </td>
+    </tr>
+  </table>
+
+  <hr>
+
+  <!-- Contact form -->
+  <h2 id="contact">
+    Contact Me
+  </h2>
+
+  <p>
+    If you have any questions or suggestions about this XRD reference,
+    please fill out the form below.
+  </p>
+
+  <form
+    action="https://formspree.io/f/xnpadjgb"
+    method="POST"
+    class="contact-form"
+  >
+    <label for="name">
+      Name：
+    </label>
+    <br>
+
+    <input
+      type="text"
+      id="name"
+      name="name"
+      placeholder="Your name"
+      required
+    >
+
+    <br><br>
+
+    <label for="email">
+      Your Email：
+    </label>
+    <br>
+
+    <input
+      type="email"
+      id="email"
+      name="email"
+      placeholder="example@gmail.com"
+      required
+    >
+
+    <br><br>
+
+    <label for="message">
+      Message：
+    </label>
+    <br>
+
+    <textarea
+      id="message"
+      name="message"
+      rows="6"
+      placeholder="Please enter your message here."
+      required
+    ></textarea>
+
+    <br><br>
+
+    <input
+      type="hidden"
+      name="_subject"
+      value="XRD Parameter Reference 網站留言"
+    >
+
+    <button type="submit">
+      Send Message
+    </button>
+  </form>
+
+  <p>
+    <a href="#top">
+      Back to top
+    </a>
+  </p>
+
+  <hr>
+
+  <h2 id="sec-references">
+    References
+  </h2>
+
+  <ol class="ref-list">
+    <li id="ref-1">
+      Bragg's Law and Diffraction Geometry,
+      Georgia Tech MSE Wiki.
+      <a
+        href="https://millwiki.mse.gatech.edu/index.php?title=Bragg's_Law_and_Diffraction_Geometry"
+        target="_blank"
+        rel="noopener"
+      >
+        millwiki.mse.gatech.edu
+      </a>
+    </li>
+
+    <li id="ref-2">
+      X-Ray Diffraction (XRD),
+      Anton Paar Wiki.
+      <a
+        href="https://wiki.anton-paar.com/en/x-ray-diffraction-xrd/"
+        target="_blank"
+        rel="noopener"
+      >
+        wiki.anton-paar.com
+      </a>
+    </li>
+
+    <li id="ref-3">
+      X-ray diffraction,
+      Wikipedia.
+      <a
+        href="https://en.wikipedia.org/wiki/X-ray_diffraction"
+        target="_blank"
+        rel="noopener"
+      >
+        en.wikipedia.org
+      </a>
+    </li>
+
+    <li id="ref-4">
+      Systematic Absences,
+      Crystallography course notes, IQFR-CSIC.
+      <a
+        href="https://www.xtal.iqf.csic.es/Cristalografia/parte_07_2-en.html"
+        target="_blank"
+        rel="noopener"
+      >
+        xtal.iqf.csic.es
+      </a>
+    </li>
+  </ol>
+
+</body>
+</html>
+
+    <tr>
+      <td>Undo View / arrow keys / scroll / drag</td>
+      <td>
         Provides
